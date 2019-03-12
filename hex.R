@@ -11,7 +11,7 @@
 # hex(0.5,1.28,5,5,DotPlot=T) 
 ##################################################################################  
 
-hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F){
+hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   
   #set working directory 
   #setwd()
@@ -127,9 +127,11 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F){
   par(mar = c(0.1, 0.1, 0.1, 0.1))
   plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
   
-  # The fanplot function plots the hexigons. 
-  fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
   
+  # The fanplot function plots the hexigons. 
+  if (GridLines == T){
+  fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
+  }
   
   ########   PLOTTING THE DOTS ######
   
