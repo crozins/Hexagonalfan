@@ -1,6 +1,6 @@
 ##################################################################################  
 # EXAMPLE 1 for the example in the manuscript (Fig. 4) 
-# hex(0.25,1.27,5,17)  
+# hex(0.25,1.27,5,7)  
 # in the above values set to: 
 # x<-0.25 # distance between first two plants (minimum distance)
 # delta<-1.27 # this is the multiplier 
@@ -11,22 +11,35 @@
 # hex(0.5,1.28,5,5,DotPlot=T) 
 ##################################################################################  
 
-hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
+hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=T){
   
   #set working directory 
   #setwd()
   
 
   
+  # some warning messages about parameter values if they are set out of range. 
+  
+
+  if( delta<=1 ) warning('oops... delta is the increment of increase, so it should be greater than one!')
+  if( x<0 ) warning('oops... x, the minimum spacing bw plants, needs to be greater than zero')
+  if( N<3 ) warning('oops... You need a minimum of 3 whorls, N,  to make a fan!')
+  # if N is smaller than 3, set it to 3
+    if (N<3){
+      N<-3
+    }
+  if( S<3 ) warning('oops... You need at minimum of 3 spokes, S, to make a fan!')
+  # if S is less than 3, set it to 3
+    if (S<3){
+      S<-3
+    }
+  
+  
   ##################################################################################  
   # Some math that needs to be calculated, see Supplimentary Material for details ##
   ##################################################################################
   
   
-  # make sure S is at least 3
-  if (S<3){
-    S<-3
-  }
   # determine the number of type 1 (t2) and type 1 (t1) spokes. Spokes are added right then left of the y-axis
   if (S%%2==0) {
     t2<-S/2
@@ -116,14 +129,14 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   ##################################################
   
   #preps a window 
-  # quartz() # makes figure windown pop up.
+  # makes figure windown pop up (this depends on your operating system)
   
   switch(Sys.info()[['sysname']],
          Windows= {windows()},
          Linux  = {x11()},
          Darwin = {quartz()})
   
-  #pdf("Fig.pdf")
+
   par(mar = c(0.1, 0.1, 0.1, 0.1))
   plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
   
@@ -133,7 +146,11 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
   }
   
+  ###################################
   ########   PLOTTING THE DOTS ######
+  ###################################
+  
+  
   
   ## PLOT THE SPOKE 2 DOTS (first whorl type) ##
   
@@ -166,6 +183,7 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   ###################################
   ######## PLOTTING THE SPOKES ######
   ###################################
+  
   # this gets x and y corr of the top of each spoke 2 type
   xcor<-tail(r_t2,1)*cos(th1) 
   ycor<-tail(r_t2,1)*sin(th1)
@@ -180,9 +198,9 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   }
   
   
+  #### This saves the cartesian (x,y) coordinates of all plants, spoke by spoke from left to right ###
   
   if (Cartesian == T){
-    # Uncomment to save cartesian (x,y) coordinates of all plants, spoke by spoke from left to right
     XYPlantPositionTable<-cartesian.plant(x,delta,r_t2,r_t1,t1,t2,th2,th1)
     print(XYPlantPositionTable)
     write.csv(XYPlantPositionTable, file="XYPlantPositionTable.csv",row.names=FALSE) # not working
@@ -216,10 +234,12 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
 }
 
 
-# this outputs the cartesian coordinates of all plants. 
+# Function that determins the cartesian coordinates of all plants. This function requires input values:
+# x = min spacing, delta = incriment of increase (already set when you call the hex() functions)
+# r_t2, r_t1 radius, from the origin, to the dots (plant positions) for the two spoke types (t1 and t2), t1,t2 = number of t1 and t2 spokes
+# and finally th1 and th2 are the angles (from x-axis to spoke) for each spoke of each type. 
 
 cartesian.plant <- function(x,delta,r_t2,r_t1,t1,t2,th2,th1){
-  
   
   
   
@@ -291,13 +311,11 @@ cartesian.plant <- function(x,delta,r_t2,r_t1,t1,t2,th2,th1){
 }
 
 
-# this plots the hexigons
+# this plots the hexagons i.e. it joins all the plants together, highlighting the distances between them and what constitutes a nearest neighbour. 
+# S = # spokes (defined already when you called hex())
+# t1, t2 number of spokes type 1 and 2. th1,th2, angles of each spoke of types 1 and 2, and 
 
-# x = min plant distance
-# delta = multimplier
-# S = spokes
-# N = whorls
-fanplot<-function(S,t2,t1,th1,th2,r_r,r_t2){
+fanplot<-function(S,t2,t1,th1,th2,r_t1,r_t2){
   
   # Determine all the connections for the hexigons
   if (S==3){
@@ -340,13 +358,13 @@ fanplot<-function(S,t2,t1,th1,th2,r_r,r_t2){
   
   
   # connect type 1 to type 2 dots
-  for(l in 1:length(r_r)){
-    segments(r_r[l] * cos(th2[ko]), r_r[l] * sin(th2[ko]), r_t2[l] * cos(th1[kg]), r_t2[l] * sin(th1[kg]), col="black",lwd=1)
+  for(l in 1:length(r_t1)){
+    segments(r_t1[l] * cos(th2[ko]), r_t1[l] * sin(th2[ko]), r_t2[l] * cos(th1[kg]), r_t2[l] * sin(th1[kg]), col="black",lwd=1)
   }
   
   # diagonal lines from type 2 down to type 1 dots
   for(f in 2:length(r_t2)){
-    segments(r_t2[f] * cos(th1[kg]), r_t2[f] * sin(th1[kg]), r_r[f-1] * cos(th2[ko]),r_r[f-1] * sin(th2[ko]), col="black",lwd=1)
+    segments(r_t2[f] * cos(th1[kg]), r_t2[f] * sin(th1[kg]), r_t1[f-1] * cos(th2[ko]),r_t1[f-1] * sin(th2[ko]), col="black",lwd=1)
   }
   
   #connect the spoke type 2 dots of same distance from origin
@@ -355,8 +373,8 @@ fanplot<-function(S,t2,t1,th1,th2,r_r,r_t2){
   }
   
   #connect the spoke 1 type dots of same distance from origin
-  for(l in 1:length(r_r)){    
-    segments(r_r[l] * cos(th2[n.th2]), r_r[l] * sin(th2[n.th2]), r_r[l] * cos(th2[n.th2+1]),r_r[l] * sin(th2[n.th2+1]), col="black",lwd=1)
+  for(l in 1:length(r_t1)){    
+    segments(r_t1[l] * cos(th2[n.th2]), r_t1[l] * sin(th2[n.th2]), r_t1[l] * cos(th2[n.th2+1]),r_t1[l] * sin(th2[n.th2+1]), col="black",lwd=1)
   }
   
   # ################################
