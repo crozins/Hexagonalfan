@@ -1,27 +1,65 @@
 ##################################################################################  
-# EXAMPLE 1 for the example in the manuscript (Fig. 3) 
-# hex(0.25,1.27,5,17)  
-# in the above values set to: 
-# x<-0.25 # distance between first two plants (minimum distance)
-# delta<-1.27 # this is the multiplier 
-# S<-5 #number of spokes 
-# N<-17 #number of whorls
+# EXAMPLE 1 for the example in the supplimentary material (Fig. S5) 
+# balanced.design.hex(0.25,1.2,7,1)  
 
-# EXAMPLE 2 Fig. S2 (see Supplimentary Material)
-# hex(0.5,1.28,5,5,DotPlot=T) 
+#S<-33
+#N<-7
+#x<-.25
+#delta=1.2
+#key=1
+
+ 
 ##################################################################################  
 
-hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
+balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=T){
   
   #set working directory 
   #setwd()
   
-
+  #the minimum balanced design must have 33 spokes. 
   
+  S=33
+  #key=1;
+  ###################################################
+  ######        6 Balanced Designs    ###############
+  ###################################################
+  
+  
+  # key 1
+  if(key==1){
+    type2<-c(0,0,0,0,1,0,0,0,1,1,1,1,0,1,1,1) # has filler plant (augmented), top g type, spoke 2
+    type1<-c(0,1,0,0,0,0,1,1,1,0,1,1,1,1,0,0,0) # middle , o type, spoke 1
+  }
+  # key 2
+  if(key==2){
+    type2<-c(0,0,0,1,1,1,1,0,1,1,1,0,0,0,0,1)
+    type1<-c(0,1,1,1,0,1,1,1,1,0,0,0,1,0,0,0,0)
+  }
+  
+  # key 5
+  if(key==3){
+    type2<-c(0,0,0,0,1,1,1,0,1,1,1,1,0,0,0,1)
+    type1<-c(0,1,0,0,0,0,0,1,1,0,1,1,1,1,1,0,0)
+  }
+  # key 6
+  if(key==4){
+    type2<-c(0,0,1,1,1,1,1,0,1,1,0,0,0,0,0,1)
+    type1<-c(0,1,0,0,0,1,1,1,1,0,1,1,1,0,0,0,0)
+  }
+
+  if(key==5){
+    type2<-c(0,0,1,0,0,0,0,0,1,1,0,1,1,1,1,1)
+    type1<-c(0,1,0,0,0,0,1,1,1,0,1,1,1,1,0,0,0)
+  }
+  # key 10
+  if(key==6){
+    type2<-c(0,0,0,1,1,1,1,0,1,1,1,0,0,0,0,1)
+    type1<-c(0,1,1,1,1,1,0,1,1,0,0,0,0,0,1,0,0)
+  }
   ##################################################################################  
   # Some math that needs to be calculated, see Supplimentary Material for details ##
   ##################################################################################
-  
+ 
   
   # make sure S is at least 3
   if (S<3){
@@ -123,22 +161,14 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
          Linux  = {x11()},
          Darwin = {quartz()})
   
-  GetPlotSize=cartesian.plant(x,delta,r_t2,r_t1,t1,t2,th2,th1)
-  
-  X.max=max(GetPlotSize$Xcor)
-  X.min=min(GetPlotSize$Xcor)
-  Y.max=max(GetPlotSize$Ycor)
-  Y.min=min(c(0,min(GetPlotSize$Ycor)))
-  
   #pdf("Fig.pdf")
   par(mar = c(0.1, 0.1, 0.1, 0.1))
-#  plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
-  plot(NA, xlab='', ylab='',axes = FALSE, xlim = c(X.min, X.max), ylim = c(Y.min, Y.max), asp = 1)
+  plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
   
   
   # The fanplot function plots the hexigons. 
   if (GridLines == T){
-  fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
+    fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
   }
   
   ########   PLOTTING THE DOTS ######
@@ -150,9 +180,10 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
     for(j in 1:length(r_t2)){
       X <- r_t2[j] * cos(th1[i]) #polar to cartesian x
       Y <-r_t2[j] * sin(th1[i]) #polar to cartesian y
-      if (DotPlot == T){
+      if (type2[i]==0){
         points(X, Y, type = 'b', pch = 20, col = "black")
-      }
+      } else 
+        points(X, Y, type = 'b', pch = 17, col = "darkred")
     }
   }
   
@@ -163,9 +194,10 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
     for(j in 1:length(r_t1)){
       X <- r_t1[j] * cos(th2[i]); #polar to cartesian x
       Y <-r_t1[j] * sin(th2[i]); #polar to cartesian y
-      if (DotPlot == T){
+      if (type1[i]==0){
         points(X, Y, type = 'b', pch = 20, col = "black")
-      }
+      } else 
+        points(X, Y, type = 'b', pch = 17, col = "darkred")
     }
   }
   
@@ -194,9 +226,9 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
     XYPlantPositionTable<-cartesian.plant(x,delta,r_t2,r_t1,t1,t2,th2,th1)
     print(XYPlantPositionTable)
     xside <- max(XYPlantPositionTable$Xcor) + abs(min(XYPlantPositionTable$Xcor))
-    yside <- max(XYPlantPositionTable$Ycor) + abs(min(XYPlantPositionTable$Ycor))
+    yside <- max(XYPlantPositionTable$Ycor)
     
-    dimensions <- c(xside=xside,yside=yside)
+    dimensions <- c(x=xside,y=yside)
     print("Fan box dimensions are: ")
     print(dimensions)
     write.csv(XYPlantPositionTable, file="XYPlantPositionTable.csv",row.names=FALSE) # not working
@@ -224,11 +256,8 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
   Min.Max.Dist=cbind(Type1Dist,Type2Dist)
   colnames(Min.Max.Dist) <- c("Spoke1.Min.Max","Spoke2.Min.Max")
   
-  # determine the number of plants needed
-  XYPlantPositionTable<-cartesian.plant(x,delta,r_t2,r_t1,t1,t2,th2,th1)
-  number.of.points <- dim(XYPlantPositionTable)[1]
   
-  newList <- list("SPOKES" = spokes, "MAX.MIN.DIST" = Min.Max.Dist, "NUMBER.OF.POINTS" = number.of.points)
+  newList <- list("SPOKES" = spokes, "MAX.MIN.DIST" = Min.Max.Dist)
   return(newList)
 }
 
@@ -239,7 +268,10 @@ hex <- function(x,delta,S,N,SpokePlot=F,DotPlot=F,Cartesian=F,GridLines=F){
 
 cartesian.plant <- function(x,delta,r_t2,r_t1,t1,t2,th2,th1){
   
-
+  
+  
+  
+  
   if (max(th2)>max(th1)){
     pointsTableType1 <- (matrix(ncol=3,nrow=t2*length(r_t2)))
     for(i in 1:length(th1)){
@@ -301,8 +333,8 @@ cartesian.plant <- function(x,delta,r_t2,r_t1,t1,t2,th2,th1){
     #print(total)
     total2<-total[order(total$spoke),]
     xside <- max(pointsTableType2$Xcor) + abs(min(pointsTableType2$Xcor))
-    yside <- max(pointsTableType2$Ycor) + 100#abs(min(pointsTableType2$Ycor))
-    ###### STILL NEED TO FIX THIS *********
+    yside <- max(pointsTableType2$Ycor)
+    
     dimensions <- c(x=xside,y=yside)
     print("Fan box dimensions are: ")
     print(dimensions)
@@ -381,7 +413,6 @@ fanplot<-function(S,t2,t1,th1,th2,r_r,r_t2){
   for(l in 1:length(r_r)){    
     segments(r_r[l] * cos(th2[n.th2]), r_r[l] * sin(th2[n.th2]), r_r[l] * cos(th2[n.th2+1]),r_r[l] * sin(th2[n.th2+1]), col="black",lwd=1)
   }
-
   
   # ################################
   
