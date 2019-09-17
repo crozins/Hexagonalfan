@@ -156,6 +156,13 @@ balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=
   #preps a window 
   # quartz() # makes figure windown pop up.
   
+  GetPlotSize=cartesian.plant(x,delta,r_t2,r_t1,t1,t2,th2,th1)
+  
+  X.max=max(GetPlotSize$Xcor)
+  X.min=min(GetPlotSize$Xcor)
+  Y.max=max(GetPlotSize$Ycor)
+  Y.min=min(c(0,min(GetPlotSize$Ycor)))
+  
   switch(Sys.info()[['sysname']],
          Windows= {windows()},
          Linux  = {x11()},
@@ -163,13 +170,17 @@ balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=
   
   #pdf("Fig.pdf")
   par(mar = c(0.1, 0.1, 0.1, 0.1))
-  plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
-  
+  #plot(NA, xlab='', ylab='',axes = FALSE, xlim=c(-max(tail(r_t1,1),tail(r_t2)),max(tail(r_t1,1),tail(r_t2))), ylim=c(min(r_t1[1],r_t2[1]),max(tail(r_t1,1),tail(r_t2))), asp = 1)
+  plot(NA, xlab='', ylab='',axes = FALSE, xlim = c(X.min, X.max), ylim = c(Y.min, Y.max), asp = 1)
+  ##################################
+  ##    PLOT GRID LINES         ####
+  ##################################
   
   # The fanplot function plots the hexigons. 
   if (GridLines == T){
     fanplot(S,t2,t1,th1,th2,r_t1,r_t2)
   }
+
   
   ########   PLOTTING THE DOTS ######
   
@@ -183,7 +194,8 @@ balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=
       if (type2[i]==0){
         points(X, Y, type = 'b', pch = 20, col = "black")
       } else 
-        points(X, Y, type = 'b', pch = 17, col = "darkred")
+        points(X, Y, type = 'b', pch = 21, bg = "white", col = "black", 
+               lwd = 0.9, cex = 1)
     }
   }
   
@@ -197,9 +209,13 @@ balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=
       if (type1[i]==0){
         points(X, Y, type = 'b', pch = 20, col = "black")
       } else 
-        points(X, Y, type = 'b', pch = 17, col = "darkred")
+        points(X, Y, type = 'b', pch = 21, bg = "white", col = "black", 
+               lwd = 0.9, cex = 1)
     }
   }
+  
+  
+
   
   
   
@@ -214,6 +230,8 @@ balanced.design.hex <- function(x,delta,N,key,SpokePlot=F,Cartesian=F,GridLines=
   xcor.orange<-tail(r_t1,1)*cos(th2) 
   ycor.orange<-tail(r_t1,1)*sin(th2)
   
+  
+  ## 
   if (SpokePlot == T){
     segments(0, 0, xcor, ycor, col="black",lwd=1,lty=2) # spoke type 1
     segments(0, 0, xcor.orange, ycor.orange, col="black",lwd=1) # spoke type 2
